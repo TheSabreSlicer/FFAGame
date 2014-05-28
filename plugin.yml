@@ -1,0 +1,17 @@
+name: FFAGame
+main: net.piedmontmc.ffagame.Main
+author: TheSabreSlicer
+version: 1.0
+description: A simple FFA minigame plugin
+commands:
+    ffa:
+        description: Main FFA command.
+        permission: ffa.user
+        usage: Do /ffa for help.
+permissions:
+    ffa.admin:
+        description: Grants FFA admin commands.
+        default: op
+    ffa.user:
+        description: Grants FFA user commands.
+        default: true
