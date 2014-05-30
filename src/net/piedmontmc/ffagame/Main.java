@@ -16,6 +16,7 @@ public class Main extends JavaPlugin{
 	private static Main main;
 	public ArrayList<Arena> arenas = new ArrayList<Arena>();
 	public Location lobby;
+	public boolean inGame = false;
 	@Override
 	public void onEnable(){
 		getLogger().info("Total playable arenas: " + arenas.size());
@@ -28,9 +29,8 @@ public class Main extends JavaPlugin{
 		sender.sendMessage(ChatColor.RED + "FFA Help:");
 		sender.sendMessage(ChatColor.GRAY + "To view the help, type: /ffa help");
 		sender.sendMessage(ChatColor.GRAY + "To start a game, type: /ffa start <arena>");
-		sender.sendMessage(ChatColor.GRAY + "To add a spawn, type: /ffa add spawn <arena>");
+		sender.sendMessage(ChatColor.GRAY + "To add a spawn or mine, type: /ffa add <spawn|mine> <arena>");
 		sender.sendMessage(ChatColor.GRAY + "To set the lobby, type: /ffa set lobby");
-		sender.sendMessage(ChatColor.GRAY + "To add a mine, type: /ffa add mine <arena>");
 		sender.sendMessage(ChatColor.GRAY + "To reset mines and spawns for an arena, type: /ffa reset <arena>");
 		sender.sendMessage(ChatColor.GRAY + "To create an arena, type: /ffa create <name>");
 		sender.sendMessage(ChatColor.GRAY + "To remove an arena, type: /ffa remove <name>");
@@ -43,11 +43,11 @@ public class Main extends JavaPlugin{
 				displayHelp(sender);
 				return true;
 			}
-			if(args.length==1 && args[0].equalsIgnoreCase("help")){ //This is /ffa help
+			if(args.length==1 && args[0].equalsIgnoreCase("help")){ // This is /ffa help
 				displayHelp(sender);
 				return true;
 			}
-			if(args.length==2 && args[0].equalsIgnoreCase("create")){ //This is /ffa create <arena>
+			if(args.length==2 && args[0].equalsIgnoreCase("create")){ // This is /ffa create <arena>
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
 						sender.sendMessage(ChatColor.RED + "An arena called " + args[1] + " already exists!");
@@ -57,7 +57,7 @@ public class Main extends JavaPlugin{
 				arenas.add(new Arena(args[1]));
 				return true;
 			}
-			if(args.length==2 && args[0].equalsIgnoreCase("remove")){ //This is /ffa remove <arena>
+			if(args.length==2 && args[0].equalsIgnoreCase("remove")){ // This is /ffa remove <arena>
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
 						arenas.remove(a);
@@ -68,7 +68,7 @@ public class Main extends JavaPlugin{
 				sender.sendMessage(ChatColor.RED + "No arena called " + args[1] + " was found!");
 				return true;
 			}
-			if(args.length==2 && args[0].equalsIgnoreCase("reset")){ //This is /ffa reset <arena>
+			if(args.length==2 && args[0].equalsIgnoreCase("reset")){ // This is /ffa reset <arena>
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
 						a.spawns.clear();
@@ -80,26 +80,64 @@ public class Main extends JavaPlugin{
 				sender.sendMessage(ChatColor.RED + "No arena called " + args[1] + " was found!");
 				return true;
 			}
-			if(args.length==2 && args[0].equalsIgnoreCase("set") && args[1].equalsIgnoreCase("lobby")){ //This is /ffa set lobby
+			if(args.length==2 && args[0].equalsIgnoreCase("set") && args[1].equalsIgnoreCase("lobby")){ // This is /ffa set lobby
 				Player p = (Player) sender;
 				lobby = p.getLocation();
 				p.sendMessage(ChatColor.RED + "Lobby set!");
 				return true;
 			}
-			if(args.length==1 && args[0].equalsIgnoreCase("list")){ //This is /ffa list
+			if(args.length==1 && args[0].equalsIgnoreCase("list")){ // This is /ffa list
 				sender.sendMessage(ChatColor.RED + "All arenas:");
 				for(Arena a:arenas){
 					sender.sendMessage(ChatColor.GRAY + a.name);
 				}
 				return true;
 			}
-			if(args.length==3 && args[0].equalsIgnoreCase("add")){
-				
+			if(args.length==3 && args[0].equalsIgnoreCase("add")){ // This is /ffa add <spawn|mine> <arena>
+				Player p = (Player) sender;
+				for(Arena a:arenas){
+					if(a.name.equalsIgnoreCase(args[2])){
+						if(args[1].equalsIgnoreCase("spawn")){
+							a.spawns.add(p.getLocation());
+							p.sendMessage(ChatColor.GREEN +
+									"Spawn added! There are now " + a.spawns.size() + " spawns in " + a.name + ".");
+							return true;
+						}
+						if(args[1].equalsIgnoreCase("mine")){
+							a.mines.add(p.getLocation());
+							p.sendMessage(ChatColor.GREEN +
+									"Mine added! There are now " + a.mines.size() + " mines in " + a.name + ".");
+							return true;
+						} else {
+							p.sendMessage(ChatColor.RED + "The 2nd argument must be spawn or mine!");
+							return true;
+						}
+					}
+				}
+				p.sendMessage(ChatColor.RED + "The specified arena was not found!");
+				return true;
+			}
+			if(args[0].equalsIgnoreCase("start") && args.length==2){ // This is /ffa start <arena>
+				if(inGame){
+					sender.sendMessage(ChatColor.RED + "The game has already been started!");
+					return true;
+				}
+				for(Arena a:arenas){
+					if(a.name.equalsIgnoreCase(args[1])){
+						startGame(a, (Player)sender);
+						return true;
+					}
+				}
 			}
 			return false;
 		}
 		sender.sendMessage("You must be a player to use FFA commands.");
 		return true; 
+	}
+	public void startGame(Arena a, Player p){
+		if(Bukkit.getOnlinePlayers().length<2){
+			p.sendMessage(ChatColor.RED + "There needs to be 2 players to start the game!");
+		}
 	}
 	public static Main getInstance(){
 		return main;
