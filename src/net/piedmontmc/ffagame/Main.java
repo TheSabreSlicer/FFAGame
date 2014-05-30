@@ -9,9 +9,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-// TODO add methods for adding mines and spawns...
+
 // TODO add jumping mechanics and bomb mechanics...
 // TODO add start and endgame mechs, as well as spectating...
+
 public class Main extends JavaPlugin{
 	private static Main main;
 	public ArrayList<Arena> arenas = new ArrayList<Arena>();
