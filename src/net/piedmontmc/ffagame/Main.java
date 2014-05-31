@@ -141,8 +141,15 @@ public class Main extends JavaPlugin{
 			p.sendMessage(ChatColor.RED + "There needs to be 2 players to start the game!");
 			return;
 		}
+		if(Bukkit.getServer().getOnlinePlayers().length>a.spawns.size()){
+			p.sendMessage(ChatColor.RED + "There are not enough spawns in this arena for all online players!");
+			return;
+		}
 		for(Location loc:a.mines){
 			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
+		}
+		for(Player pl:Bukkit.getOnlinePlayers()){
+			a.plys.add(pl.getName());
 		}
 	}
 	public static Main getInstance(){
