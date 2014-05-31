@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -138,6 +139,10 @@ public class Main extends JavaPlugin{
 	public void startGame(Arena a, Player p){
 		if(Bukkit.getOnlinePlayers().length<2){
 			p.sendMessage(ChatColor.RED + "There needs to be 2 players to start the game!");
+			return;
+		}
+		for(Location loc:a.mines){
+			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
 		}
 	}
 	public static Main getInstance(){
