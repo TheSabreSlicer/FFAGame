@@ -7,7 +7,7 @@ public class Countdown
 {
     private int countdownTimer;
  
-    public void start(final int time)
+    public void start(final int time, final String st)
     {
         this.countdownTimer = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable()
         {
@@ -15,7 +15,7 @@ public class Countdown
  
             public void run()
             {
-                Bukkit.broadcastMessage(ChatColor.GREEN + "Starting in " + i + " seconds!");
+                Bukkit.broadcastMessage(ChatColor.GREEN + st + " in " + i + " seconds!");
                 this.i--;
                 if (this.i <= 0)
                 {

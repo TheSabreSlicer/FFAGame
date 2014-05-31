@@ -19,6 +19,7 @@ public class Main extends JavaPlugin{
 	public ArrayList<Arena> arenas = new ArrayList<Arena>();
 	public Location lobby;
 	public boolean inGame = false;
+	public boolean noMove = false;
 	public String curArena;
 	private Countdown cd;
 	public Main(){
@@ -152,6 +153,8 @@ public class Main extends JavaPlugin{
 			p.sendMessage(ChatColor.RED + "There are not enough spawns in this arena for all online players!");
 			return;
 		}
+		inGame=true;
+		noMove=true;
 		for(Location loc:a.mines){
 			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
 		}
@@ -161,11 +164,12 @@ public class Main extends JavaPlugin{
 		int i = 0;
 		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
 			pl.setHealth(20.0);
-			countdown().start(15);
-			pl.sendMessage(ChatColor.GREEN + "The game has started!");
 			pl.teleport(a.spawns.get(i));
 			i++;
 		}
+		countdown().start(15, "Game starting");
+		noMove=false;
+		Bukkit.broadcastMessage(ChatColor.GREEN + "The game has started!");
 	}
 	public static Main getInstance(){
 		return main;
