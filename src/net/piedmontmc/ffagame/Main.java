@@ -20,12 +20,14 @@ public class Main extends JavaPlugin{
 	public Location lobby;
 	public boolean inGame = false;
 	public String curArena;
+	private Countdown cd;
 	public Main(){
 		main = this;
 	}
 	@Override
 	public void onEnable(){
 		getLogger().info("Total playable arenas: " + arenas.size());
+		this.cd = new Countdown();
 	}
 	@Override
 	public void onDisable(){
@@ -159,6 +161,7 @@ public class Main extends JavaPlugin{
 		int i = 0;
 		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
 			pl.setHealth(20.0);
+			countdown().start(15);
 			pl.sendMessage(ChatColor.GREEN + "The game has started!");
 			pl.teleport(a.spawns.get(i));
 			i++;
@@ -166,5 +169,8 @@ public class Main extends JavaPlugin{
 	}
 	public static Main getInstance(){
 		return main;
+	}
+	public Countdown countdown() {
+		return this.cd;
 	}
 }
