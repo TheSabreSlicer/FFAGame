@@ -10,6 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 // TODO add jumping mechanics and bomb mechanics...
@@ -136,7 +138,7 @@ public class Main extends JavaPlugin{
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
 						curArena = a;
-						startGame(a, (Player)sender);
+						startGame(a);
 						return true;
 					}
 				}
@@ -146,13 +148,13 @@ public class Main extends JavaPlugin{
 		sender.sendMessage("You must be a player to use FFA commands.");
 		return true; 
 	}
-	public void startGame(Arena a, Player p){
+	public void startGame(Arena a){
 		if(Bukkit.getServer().getOnlinePlayers().length<2){
-			p.sendMessage(ChatColor.RED + "There needs to be 2 players to start the game!");
+			Bukkit.broadcastMessage(ChatColor.RED + "There needs to be 2 players to start the game!");
 			return;
 		}
 		if(Bukkit.getServer().getOnlinePlayers().length>a.spawns.size()){
-			p.sendMessage(ChatColor.RED + "There are not enough spawns in this arena for all online players!");
+			Bukkit.broadcastMessage(ChatColor.RED + "There are not enough spawns in this arena for all online players!");
 			return;
 		}
 		inGame=true;
@@ -166,6 +168,10 @@ public class Main extends JavaPlugin{
 		int i = 0;
 		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
 			pl.setHealth(20.0);
+			Inventory inv = pl.getInventory();
+			inv.clear();
+			ItemStack is = new ItemStack(Material.STONE_SWORD, 1);
+			inv.addItem(is);
 			pl.teleport(curArena.spawns.get(i));
 			i++;
 		}
@@ -173,12 +179,23 @@ public class Main extends JavaPlugin{
 		noMove=false;
 		Bukkit.broadcastMessage(ChatColor.GREEN + "The game has started!");
 	}
-	public boolean needEnd(){
-		if(curArena.plys.size()<2){
-			return true;
+	public void endGame(){
+		Bukkit.broadcastMessage(ChatColor.BLUE + curArena.plys.get(0) + " has won the game!");
+		for(Player p:Bukkit.getServer().getOnlinePlayers()){
+			p.setHealth(20.0);
+			Inventory inv = p.getInventory();
+			inv.clear();
+			p.teleport(lobby);
 		}
-		
-		return true;
+		countdown().start(30, "New game");
+		startGame(arenas.get(gen.nextInt(arenas.size()-1)));
+	}
+	public boolean needEnd(){
+		if(curArena.plys.size()<2 && inGame){
+			return true;
+		} else {
+			return false;
+		}
 	}
 	public static Main getInstance(){
 		return main;
