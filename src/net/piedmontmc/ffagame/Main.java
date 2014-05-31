@@ -7,17 +7,31 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 // TODO add jumping mechanics and bomb mechanics...
 // TODO add start and endgame mechs, as well as spectating...
 
-public class Main extends JavaPlugin{
+public class Main extends JavaPlugin implements Listener{
 	private static Main main;
 	public ArrayList<Arena> arenas = new ArrayList<Arena>();
 	public Random gen = new Random();
@@ -31,12 +45,10 @@ public class Main extends JavaPlugin{
 	}
 	@Override
 	public void onEnable(){
-		getLogger().info("Total playable arenas: " + arenas.size());
 		this.cd = new Countdown();
 	}
 	@Override
 	public void onDisable(){
-		getLogger().info("Trying to save arenas...maybe?");
 	}
 	public void displayHelp(CommandSender sender){
 		sender.sendMessage(ChatColor.RED + "FFA Help:");
@@ -68,6 +80,7 @@ public class Main extends JavaPlugin{
 					}
 				}
 				arenas.add(new Arena(args[1]));
+				sender.sendMessage(ChatColor.GREEN + "The arena called " + args[1] + " was created!");
 				return true;
 			}
 			if(args.length==2 && args[0].equalsIgnoreCase("remove")){ // This is /ffa remove <arena>
@@ -202,5 +215,115 @@ public class Main extends JavaPlugin{
 	}
 	public Countdown countdown() {
 		return this.cd;
+	}
+	@EventHandler
+	public void onBreak(BlockBreakEvent e) {
+		if (e.getPlayer().isOp())
+			e.setCancelled(false);
+		else
+			e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onPlace(BlockPlaceEvent e) {
+		if (e.getPlayer().isOp())
+			e.setCancelled(false);
+		else
+			e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onPlayerDamage(final EntityDamageEvent e) {
+		if (e.getCause() == DamageCause.FALL) {
+			e.setCancelled(true);
+		}
+	}
+	@EventHandler
+	public void onDeath(PlayerDeathEvent e){
+		Player p = e.getEntity();
+		Player kl = p.getKiller();
+		curArena.plys.remove(p.getName());
+		curArena.specs.add(p.getName());
+		Bukkit.broadcastMessage(ChatColor.RED + p.getName() + " was killed by " + kl.getName() + "!");
+		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
+			pl.playSound(pl.getLocation(), Sound.FIREWORK_LARGE_BLAST, 5.0F, 0.5F);
+		}
+	}
+	@EventHandler
+	public void onDeath(PlayerQuitEvent e){
+		Player p = e.getPlayer();
+		curArena.plys.remove(p.getName());
+		curArena.specs.add(p.getName());
+	}
+	@EventHandler
+	public void onRespawn(PlayerRespawnEvent e){
+		e.setRespawnLocation(lobby);
+	}
+	@EventHandler
+	public void onMove(PlayerMoveEvent e) {
+		Player p = (Player) e.getPlayer();
+		if (inGame) {
+			mineCheck(p);
+			jumpCheck(p);
+			wallCheck(p);
+		}
+		if (noMove) {
+			e.setCancelled(true);
+		}
+		if(needEnd()){
+			endGame();
+		}
+	}
+	public void wallCheck(Player p){
+		int x = 0;
+		int y = 0;
+		int z = 0;
+		
+		Vector vector = new Vector(x, y, z);
+		// The following vector calculator is from: https://forums.bukkit.org/threads/ricochet-player-help-detecting-if-player-hits-a-wall.224498/s
+        if (p.getEyeLocation().add(p.getVelocity().normalize()).getBlock().getType() != Material.AIR || p.getLocation().add(p.getVelocity().normalize()).getBlock().getType() != Material.AIR) {
+            if (p.getEyeLocation().getBlock().getFace(p.getEyeLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.UP || p.getLocation().getBlock().getFace(p.getLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.DOWN) {
+                y = y * (-1);
+                p.setMetadata("yVector", new FixedMetadataValue(this, y));
+            }
+            if (p.getEyeLocation().getBlock().getFace(p.getEyeLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.EAST || p.getLocation().getBlock().getFace(p.getLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.EAST || p.getEyeLocation().getBlock().getFace(p.getEyeLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.WEST || p.getLocation().getBlock().getFace(p.getLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.WEST) {
+                x = x * (-1);
+                p.setMetadata("xVector", new FixedMetadataValue(this, x));
+            }
+            if (p.getEyeLocation().getBlock().getFace(p.getEyeLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.NORTH || p.getLocation().getBlock().getFace(p.getLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.NORTH || p.getEyeLocation().getBlock().getFace(p.getEyeLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.SOUTH || p.getLocation().getBlock().getFace(p.getLocation().add(p.getVelocity().normalize()).getBlock()) == BlockFace.SOUTH) {
+                z = z * (-1);
+                p.setMetadata("zVector", new FixedMetadataValue(this, z));
+            }
+        }
+
+        vector = new Vector(x,y,z);
+        p.setVelocity(vector);
+	}
+	public void mineCheck(Player p) {
+		for (Location loc : curArena.mines) {
+			if (Math.abs(p.getLocation().getX() - loc.getX()) < 2) {
+				if (Math.abs(p.getLocation().getY() - loc.getY()) < 1) {
+					if (Math.abs(p.getLocation().getZ() - loc.getZ()) < 2) {
+						loc.getWorld().createExplosion(loc, 5.0F);
+						curArena.mines.remove(loc);
+					}
+				}
+			}
+		}
+	}
+
+	public void jumpCheck(Player p) {
+		double x = 0, z = 0, y = 0;
+		Vector vector = new Vector(x, z, y);
+		Vector v = p.getVelocity();
+		if (p.getWorld()
+				.getBlockAt(p.getLocation().getBlockX(),
+						(p.getLocation().getBlockY() - 1),
+						p.getLocation().getBlockZ()).equals(Material.WOOL)) {
+			vector.setX(v.getX() * 2);
+			vector.setY(v.getY() + 10);
+			vector.setZ(v.getZ() * 2);
+			p.setVelocity(vector);
+		}
 	}
 }
