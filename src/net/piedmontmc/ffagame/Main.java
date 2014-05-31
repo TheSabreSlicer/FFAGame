@@ -20,6 +20,9 @@ public class Main extends JavaPlugin{
 	public Location lobby;
 	public boolean inGame = false;
 	public String curArena;
+	public Main(){
+		main = this;
+	}
 	@Override
 	public void onEnable(){
 		getLogger().info("Total playable arenas: " + arenas.size());
@@ -64,7 +67,7 @@ public class Main extends JavaPlugin{
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
 						arenas.remove(a);
-						sender.sendMessage(ChatColor.RED + "The arena called " + args[1] + " was removed!");
+						sender.sendMessage(ChatColor.GREEN + "The arena called " + args[1] + " was removed!");
 						return true;
 					}
 				}
@@ -76,7 +79,7 @@ public class Main extends JavaPlugin{
 					if(a.name.equalsIgnoreCase(args[1])){
 						a.spawns.clear();
 						a.mines.clear();
-						sender.sendMessage(ChatColor.RED + "The arena called " + args[1] + " was reset!");
+						sender.sendMessage(ChatColor.GREEN + "The arena called " + args[1] + " was reset!");
 						return true;
 					}
 				}
@@ -86,11 +89,11 @@ public class Main extends JavaPlugin{
 			if(args.length==2 && args[0].equalsIgnoreCase("set") && args[1].equalsIgnoreCase("lobby")){ // This is /ffa set lobby
 				Player p = (Player) sender;
 				lobby = p.getLocation();
-				p.sendMessage(ChatColor.RED + "Lobby set!");
+				p.sendMessage(ChatColor.GREEN + "Lobby set!");
 				return true;
 			}
 			if(args.length==1 && args[0].equalsIgnoreCase("list")){ // This is /ffa list
-				sender.sendMessage(ChatColor.RED + "All arenas:");
+				sender.sendMessage(ChatColor.GREEN + "All arenas:");
 				for(Arena a:arenas){
 					sender.sendMessage(ChatColor.GRAY + a.name);
 				}
@@ -139,7 +142,7 @@ public class Main extends JavaPlugin{
 		return true; 
 	}
 	public void startGame(Arena a, Player p){
-		if(Bukkit.getOnlinePlayers().length<2){
+		if(Bukkit.getServer().getOnlinePlayers().length<2){
 			p.sendMessage(ChatColor.RED + "There needs to be 2 players to start the game!");
 			return;
 		}
@@ -150,8 +153,15 @@ public class Main extends JavaPlugin{
 		for(Location loc:a.mines){
 			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
 		}
-		for(Player pl:Bukkit.getOnlinePlayers()){
+		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
 			a.plys.add(pl.getName());
+		}
+		int i = 0;
+		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
+			pl.setHealth(20.0);
+			pl.sendMessage(ChatColor.GREEN + "The game has started!");
+			pl.teleport(a.spawns.get(i));
+			i++;
 		}
 	}
 	public static Main getInstance(){
