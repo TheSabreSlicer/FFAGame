@@ -1,6 +1,7 @@
 package net.piedmontmc.ffagame;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,10 +18,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin{
 	private static Main main;
 	public ArrayList<Arena> arenas = new ArrayList<Arena>();
+	public Random gen = new Random();
 	public Location lobby;
 	public boolean inGame = false;
 	public boolean noMove = false;
-	public String curArena;
+	public Arena curArena;
 	private Countdown cd;
 	public Main(){
 		main = this;
@@ -133,7 +135,7 @@ public class Main extends JavaPlugin{
 				}
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
-						curArena = a.name;
+						curArena = a;
 						startGame(a, (Player)sender);
 						return true;
 					}
@@ -159,17 +161,24 @@ public class Main extends JavaPlugin{
 			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
 		}
 		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
-			a.plys.add(pl.getName());
+			curArena.plys.add(pl.getName());
 		}
 		int i = 0;
 		for(Player pl:Bukkit.getServer().getOnlinePlayers()){
 			pl.setHealth(20.0);
-			pl.teleport(a.spawns.get(i));
+			pl.teleport(curArena.spawns.get(i));
 			i++;
 		}
-		countdown().start(15, "Game starting");
+		countdown().start(30, "Game starting");
 		noMove=false;
 		Bukkit.broadcastMessage(ChatColor.GREEN + "The game has started!");
+	}
+	public boolean needEnd(){
+		if(curArena.plys.size()<2){
+			return true;
+		}
+		
+		return true;
 	}
 	public static Main getInstance(){
 		return main;

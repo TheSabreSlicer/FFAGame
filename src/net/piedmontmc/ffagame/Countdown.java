@@ -3,6 +3,11 @@ package net.piedmontmc.ffagame;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
+
+/*
+ * Got this class from: https://forums.bukkit.org/threads/countdown-timer.204243/
+ * Modified it myself and added the "final String st"
+ */
 public class Countdown
 {
     private int countdownTimer;
