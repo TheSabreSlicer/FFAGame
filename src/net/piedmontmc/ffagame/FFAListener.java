@@ -11,17 +11,19 @@ import org.bukkit.event.player.*;
 import org.bukkit.util.Vector;
 
 public class FFAListener implements Listener {
-	private Main m = Main.getInstance();
 	ArrayList<Location> temp = new ArrayList<Location>();
 
 	@EventHandler
 	public void onMove(PlayerMoveEvent e) {
-		Player p = (Player) e.getPlayer();
-		mineCheck(p);
-		jumpCheck(p);
+		Main m = Main.getInstance();
+		if (m.inGame) {
+			Player p = (Player) e.getPlayer();
+			mineCheck(p, m);
+			jumpCheck(p);
+		}
 	}
 
-	public void mineCheck(Player p) {
+	public void mineCheck(Player p, Main m) {
 		for (Arena a : m.arenas) {
 			if (a.name.equalsIgnoreCase(m.curArena)) {
 				for (Location loc : a.mines) {
@@ -40,11 +42,12 @@ public class FFAListener implements Listener {
 	}
 
 	public void jumpCheck(Player p) {
-		double x, z, y;
+		double x = 0, z = 0, y = 0;
 		Vector vector = new Vector(x, z, y);
 		Vector v = p.getVelocity();
 		if (p.getWorld().getBlockAt(p.getLocation().getBlockX(),(p.getLocation().getBlockY() - 1),p.getLocation().getBlockZ()).equals(Material.WOOL)) {
-
+			vector.setX(v.getX()*2); vector.setY(v.getY() + 10); vector.setZ(v.getZ()*2);
+			p.setVelocity(vector);
 		}
 	}
 }
