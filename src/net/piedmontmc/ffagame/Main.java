@@ -19,6 +19,7 @@ public class Main extends JavaPlugin{
 	public ArrayList<Arena> arenas = new ArrayList<Arena>();
 	public Location lobby;
 	public boolean inGame = false;
+	public String curArena;
 	@Override
 	public void onEnable(){
 		getLogger().info("Total playable arenas: " + arenas.size());
@@ -126,6 +127,7 @@ public class Main extends JavaPlugin{
 				}
 				for(Arena a:arenas){
 					if(a.name.equalsIgnoreCase(args[1])){
+						curArena = a.name;
 						startGame(a, (Player)sender);
 						return true;
 					}
