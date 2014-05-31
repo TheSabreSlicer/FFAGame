@@ -21,6 +21,9 @@ public class FFAListener implements Listener {
 			mineCheck(p, m);
 			jumpCheck(p);
 		}
+		if(m.noMove) {
+			e.setCancelled(true);
+		}
 	}
 
 	public void mineCheck(Player p, Main m) {
