@@ -26,7 +26,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -37,8 +36,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-// TODO add jumping mechanics
-// TODO add endgame mechs, as well as spectating...
+// TODO add jumping mechanics, fix jitter
+// TODO add spectating...
 
 public class Main extends JavaPlugin implements Listener {
 	private static Main main;
@@ -93,6 +92,9 @@ public class Main extends JavaPlugin implements Listener {
 					sender.sendMessage(ChatColor.RED
 							+ "The game has already been started!");
 					return true;
+				}
+				if (lobby==null){
+					sender.sendMessage(ChatColor.RED + "The lobby has not been set!");
 				}
 				for (Arena a : arenas) {
 					if (a.name.equalsIgnoreCase(args[1])) {
@@ -239,7 +241,7 @@ public class Main extends JavaPlugin implements Listener {
 			pl.teleport(curArena.spawns.get(i));
 			i++;
 		}
-		countdown().start(15, "Game starting");
+		countdown().start(5, "Game starting");
 	}
 
 	public void endGame() {
@@ -259,7 +261,7 @@ public class Main extends JavaPlugin implements Listener {
 	}
 
 	public boolean needEnd() {
-		if (!(curArena.plys.size() > 2) && inGame) {
+		if ((curArena.plys.size()==1) && inGame) {
 			return true;
 		} else {
 			return false;
@@ -286,6 +288,7 @@ public class Main extends JavaPlugin implements Listener {
 			if((d.getHealth() - e.getDamage()<=0)&&curArena.plys.contains(p.getName())&&curArena.plys.contains(kl.getName())){
 				e.setCancelled(true);
 				curArena.plys.remove(p.getName());
+				Bukkit.broadcastMessage("Player removed in onEDE method");
 				curArena.specs.add(p.getName());
 				Bukkit.broadcastMessage(ChatColor.RED + p.getName() + " was killed by "
 						+ kl.getName() + "!");
@@ -339,6 +342,7 @@ public class Main extends JavaPlugin implements Listener {
 	public void onDeath(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		curArena.plys.remove(p.getName());
+		Bukkit.broadcastMessage("Player removed in logout method");
 		curArena.specs.add(p.getName());
 	}
 
@@ -359,7 +363,7 @@ public class Main extends JavaPlugin implements Listener {
 			jumpCheck(p);
 			// wallCheck(p);
 		}
-		if (needEnd() && inGame && !noMove) {
+		if (needEnd()==true && inGame && !noMove) {
 			endGame();
 		}
 	}
@@ -468,7 +472,7 @@ public class Main extends JavaPlugin implements Listener {
 						(p.getLocation().getBlockY() - 1),
 						p.getLocation().getBlockZ()).getType().equals(Material.WOOL)) {
 			p.getLocation().setY(p.getLocation().getY() + 1);
-			p.setVelocity(new Vector(p.getVelocity().getX()*2, 0.9, p.getVelocity().getZ()*2));
+			p.setVelocity(new Vector(p.getVelocity().getX()*2.0, 0.8, p.getVelocity().getZ()*2.0));
 		}
 	}
 	public void clearArrows(Player player) {
