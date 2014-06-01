@@ -25,6 +25,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -268,6 +269,10 @@ public class Main extends JavaPlugin implements Listener {
 
 	public Countdown countdown() {
 		return this.cd;
+	}
+	@EventHandler
+	public void cancelDrops(PlayerDropItemEvent e){
+		e.setCancelled(true);
 	}
 	@EventHandler
 	public void onEDE(EntityDamageByEntityEvent e){
