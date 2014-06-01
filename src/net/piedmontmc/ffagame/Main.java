@@ -13,15 +13,18 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_7_R3.entity.CraftPlayer;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -31,8 +34,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-// TODO add jumping mechanics and bomb mechanics...
-// TODO add start and endgame mechs, as well as spectating...
+// TODO add jumping mechanics
+// TODO add endgame mechs, as well as spectating...
 
 public class Main extends JavaPlugin implements Listener {
 	private static Main main;
@@ -90,6 +93,9 @@ public class Main extends JavaPlugin implements Listener {
 				}
 				for (Arena a : arenas) {
 					if (a.name.equalsIgnoreCase(args[1])) {
+						curArena.mines.clear();
+						curArena.plys.clear();
+						curArena.specs.clear();
 						curArena = a;
 						startGame(a);
 						return true;
@@ -221,6 +227,7 @@ public class Main extends JavaPlugin implements Listener {
 		int i = 0;
 		for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
 			pl.setHealth(20.0);
+			pl.setFoodLevel(20);
 			Inventory inv = pl.getInventory();
 			inv.clear();
 			ItemStack is = new ItemStack(Material.STONE_SWORD, 1);
@@ -239,13 +246,16 @@ public class Main extends JavaPlugin implements Listener {
 			Inventory inv = p.getInventory();
 			inv.clear();
 			p.teleport(lobby);
+			clearArrows(p);
 		}
 		inGame = false;
-		countdown().start(15, "New game");
+		for (Arrow arrow : curArena.spawns.get(0).getWorld().getEntitiesByClass(Arrow.class)) {
+			  arrow.remove();
+		}
 	}
 
 	public boolean needEnd() {
-		if (curArena.plys.size() < 2 && inGame) {
+		if (!(curArena.plys.size() > 2) && inGame) {
 			return true;
 		} else {
 			return false;
@@ -259,7 +269,29 @@ public class Main extends JavaPlugin implements Listener {
 	public Countdown countdown() {
 		return this.cd;
 	}
-
+	@EventHandler
+	public void onEDE(EntityDamageByEntityEvent e){
+		if(e.getDamager() instanceof Player && e.getEntity() instanceof Player && inGame){
+			Player kl = (Player) e.getDamager();
+			Player p = (Player) e.getEntity();
+			Damageable d = (Damageable) p;
+			if(d.getHealth() - e.getDamage()<=0){
+				e.setCancelled(true);
+				curArena.plys.remove(p.getName());
+				curArena.specs.add(p.getName());
+				Bukkit.broadcastMessage(ChatColor.RED + p.getName() + " was killed by "
+						+ kl.getName() + "!");
+				for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
+					pl.playSound(pl.getLocation(), Sound.FIREWORK_LARGE_BLAST, 5.0F,
+							1.0F);
+				}
+				p.setHealth(20.0);
+				return;
+			}
+		} else {
+			e.setCancelled(true);
+		}
+	}
 	@EventHandler
 	public void onExplode(EntityExplodeEvent e) {
 		if (e.isCancelled())
@@ -292,20 +324,6 @@ public class Main extends JavaPlugin implements Listener {
 	public void onPlayerDamage(final EntityDamageEvent e) {
 		if (e.getCause() == DamageCause.FALL) {
 			e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void onDeath(PlayerDeathEvent e) {
-		Player p = e.getEntity();
-		Player kl = p.getKiller();
-		curArena.plys.remove(p.getName());
-		curArena.specs.add(p.getName());
-		Bukkit.broadcastMessage(ChatColor.RED + p.getName() + " was killed by "
-				+ kl.getName() + "!");
-		for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
-			pl.playSound(pl.getLocation(), Sound.FIREWORK_LARGE_BLAST, 5.0F,
-					0.5F);
 		}
 	}
 
@@ -437,17 +455,15 @@ public class Main extends JavaPlugin implements Listener {
 	}
 
 	public void jumpCheck(Player p) {
-		// double x = 0, z = 0, y = 0;
-		// Vector vector = new Vector(x, z, y);
-		Vector v = p.getVelocity();
 		if (p.getWorld()
 				.getBlockAt(p.getLocation().getBlockX(),
 						(p.getLocation().getBlockY() - 1),
 						p.getLocation().getBlockZ()).getType().equals(Material.WOOL)) {
-			v.setX(v.getX() * 50);
-			v.setY(v.getY() + 1000);
-			v.setZ(v.getZ() * 50);
-			p.setVelocity(v);
+			p.getLocation().setY(p.getLocation().getY() + 1);
+			p.setVelocity(new Vector(p.getVelocity().getX()*2, 0.9, p.getVelocity().getZ()*2));
 		}
+	}
+	public void clearArrows(Player player) {
+		((CraftPlayer) player).getHandle().getDataWatcher().watch(9, (byte)0);
 	}
 }

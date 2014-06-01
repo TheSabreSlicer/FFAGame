@@ -28,11 +28,7 @@ public class Countdown
                 		m.noMove=false;
                 		Bukkit.broadcastMessage(ChatColor.GREEN + "The game has started!");
                 	}
-                	if(st.equalsIgnoreCase("New game")){
-                		Main m = Main.getInstance();
-                		Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "/ffa start " + m.arenas.get(m.gen.nextInt(m.arenas.size()-1)));
-                	}
-                    cancel();
+                    Countdown.this.cancel();
                     //ended
                 }
             }
