@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -25,6 +26,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -229,6 +231,7 @@ public class Main extends JavaPlugin implements Listener {
 		for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
 			pl.setHealth(20.0);
 			pl.setFoodLevel(20);
+			pl.setGameMode(GameMode.SURVIVAL);
 			Inventory inv = pl.getInventory();
 			inv.clear();
 			ItemStack is = new ItemStack(Material.STONE_SWORD, 1);
@@ -280,7 +283,7 @@ public class Main extends JavaPlugin implements Listener {
 			Player kl = (Player) e.getDamager();
 			Player p = (Player) e.getEntity();
 			Damageable d = (Damageable) p;
-			if(d.getHealth() - e.getDamage()<=0){
+			if((d.getHealth() - e.getDamage()<=0)&&curArena.plys.contains(p.getName())&&curArena.plys.contains(kl.getName())){
 				e.setCancelled(true);
 				curArena.plys.remove(p.getName());
 				curArena.specs.add(p.getName());
