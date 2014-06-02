@@ -47,6 +47,7 @@ public class Main extends JavaPlugin implements Listener {
 	public boolean inGame = false;
 	public boolean noMove = false;
 	public Arena curArena = new Arena("default");
+	public ArrayList<Location> tempmines = new ArrayList<Location>();
 	private Countdown cd;
 
 	public Main() {
@@ -227,6 +228,7 @@ public class Main extends JavaPlugin implements Listener {
 		noMove = true;
 		for (Location loc : a.mines) {
 			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
+			tempmines.add(loc);
 		}
 		for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
 			curArena.plys.add(pl.getName());
@@ -241,6 +243,7 @@ public class Main extends JavaPlugin implements Listener {
 			ItemStack is = new ItemStack(Material.STONE_SWORD, 1);
 			inv.addItem(is);
 			pl.teleport(curArena.spawns.get(i));
+			curArena.plspawn.put(pl.getName(), curArena.spawns.get(i));
 			i++;
 		}
 		countdown().start(5, "Game starting");
@@ -260,6 +263,11 @@ public class Main extends JavaPlugin implements Listener {
 		for (Arrow arrow : curArena.spawns.get(0).getWorld().getEntitiesByClass(Arrow.class)) {
 			  arrow.remove();
 		}
+		curArena.mines.clear();
+		for(Location loc:tempmines){
+			curArena.mines.add(loc);
+		}
+		tempmines.clear();
 	}
 
 	public boolean needEnd() {
@@ -319,7 +327,7 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
-		if (e.getPlayer().isOp())
+		if (e.getPlayer().isOp()&&!inGame)
 			e.setCancelled(false);
 		else
 			e.setCancelled(true);
@@ -327,7 +335,7 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onPlace(BlockPlaceEvent e) {
-		if (e.getPlayer().isOp())
+		if (e.getPlayer().isOp()&&!inGame)
 			e.setCancelled(false);
 		else
 			e.setCancelled(true);
@@ -357,7 +365,11 @@ public class Main extends JavaPlugin implements Listener {
 	public void onMove(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
 		if (noMove) {
-			e.setCancelled(true);
+			if(!(p.getLocation().getBlock().equals(curArena.plspawn.get(p.getName())))){
+				Location loc = curArena.plspawn.get(p.getName());
+				Location ploc = new Location(p.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), p.getLocation().getYaw(), p.getLocation().getPitch());
+				p.teleport(ploc);
+			}
 			return;
 		}
 		if (inGame && !noMove) {
@@ -459,7 +471,8 @@ public class Main extends JavaPlugin implements Listener {
 			if (Math.abs(p.getLocation().getX() - loc.getX()) < 2) {
 				if (Math.abs(p.getLocation().getY() - loc.getY()) < 1) {
 					if (Math.abs(p.getLocation().getZ() - loc.getZ()) < 2) {
-						loc.getWorld().createExplosion(loc, 5.0F);
+						loc.getWorld().createExplosion(loc, 10.0F);
+						tempmines.add(loc);
 						curArena.mines.remove(loc);
 						loc.getWorld().getBlockAt(loc).setType(Material.AIR);
 					}

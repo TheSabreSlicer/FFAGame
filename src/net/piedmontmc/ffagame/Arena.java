@@ -1,6 +1,8 @@
 package net.piedmontmc.ffagame;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Location;
 
@@ -10,6 +12,7 @@ public class Arena {
 	public ArrayList<Location> mines = new ArrayList<Location>();
 	public ArrayList<String> plys = new ArrayList<String>();
 	public ArrayList<String> specs = new ArrayList<String>();
+	public Map<String, Location> plspawn = new HashMap<>();
 	
 	public Arena(String nm){
 		name = nm;
