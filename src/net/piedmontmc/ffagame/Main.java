@@ -47,7 +47,6 @@ public class Main extends JavaPlugin implements Listener {
 	public boolean inGame = false;
 	public boolean noMove = false;
 	public Arena curArena = new Arena("default");
-	public ArrayList<Location> tempmines = new ArrayList<Location>();
 	private Countdown cd;
 
 	public Main() {
@@ -99,7 +98,6 @@ public class Main extends JavaPlugin implements Listener {
 				}
 				for (Arena a : arenas) {
 					if (a.name.equalsIgnoreCase(args[1])) {
-						curArena.mines.clear();
 						curArena.plys.clear();
 						curArena.specs.clear();
 						curArena = a;
@@ -170,7 +168,7 @@ public class Main extends JavaPlugin implements Listener {
 				if (args.length == 1 && args[0].equalsIgnoreCase("list")) { // This is /ffa list
 					sender.sendMessage(ChatColor.GREEN + "All arenas:");
 					for (Arena a : arenas) {
-						sender.sendMessage(ChatColor.GRAY + a.name);
+						sender.sendMessage(ChatColor.GRAY + a.name + " M:" + a.mines.size() + " S:" + a.spawns.size());
 					}
 					return true;
 				}
@@ -228,7 +226,7 @@ public class Main extends JavaPlugin implements Listener {
 		noMove = true;
 		for (Location loc : a.mines) {
 			loc.getWorld().getBlockAt(loc).setType(Material.TNT);
-			tempmines.add(loc);
+			curArena.tempmines.add(loc);
 		}
 		for (Player pl : Bukkit.getServer().getOnlinePlayers()) {
 			curArena.plys.add(pl.getName());
@@ -264,10 +262,10 @@ public class Main extends JavaPlugin implements Listener {
 			  arrow.remove();
 		}
 		curArena.mines.clear();
-		for(Location loc:tempmines){
+		for(Location loc:curArena.tempmines){
 			curArena.mines.add(loc);
 		}
-		tempmines.clear();
+		curArena.tempmines.clear();
 	}
 
 	public boolean needEnd() {
@@ -298,7 +296,6 @@ public class Main extends JavaPlugin implements Listener {
 			if((d.getHealth() - e.getDamage()<=0)&&curArena.plys.contains(p.getName())&&curArena.plys.contains(kl.getName())){
 				e.setCancelled(true);
 				curArena.plys.remove(p.getName());
-				Bukkit.broadcastMessage("Player removed in onEDE method");
 				curArena.specs.add(p.getName());
 				Bukkit.broadcastMessage(ChatColor.RED + p.getName() + " was killed by "
 						+ kl.getName() + "!");
@@ -352,7 +349,6 @@ public class Main extends JavaPlugin implements Listener {
 	public void onDeath(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		curArena.plys.remove(p.getName());
-		Bukkit.broadcastMessage("Player removed in logout method");
 		curArena.specs.add(p.getName());
 	}
 
@@ -472,7 +468,7 @@ public class Main extends JavaPlugin implements Listener {
 				if (Math.abs(p.getLocation().getY() - loc.getY()) < 1) {
 					if (Math.abs(p.getLocation().getZ() - loc.getZ()) < 2) {
 						loc.getWorld().createExplosion(loc, 10.0F);
-						tempmines.add(loc);
+						curArena.tempmines.add(loc);
 						curArena.mines.remove(loc);
 						loc.getWorld().getBlockAt(loc).setType(Material.AIR);
 					}

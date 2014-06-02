@@ -13,6 +13,7 @@ public class Arena {
 	public ArrayList<String> plys = new ArrayList<String>();
 	public ArrayList<String> specs = new ArrayList<String>();
 	public Map<String, Location> plspawn = new HashMap<>();
+	public ArrayList<Location> tempmines = new ArrayList<Location>();
 	
 	public Arena(String nm){
 		name = nm;
