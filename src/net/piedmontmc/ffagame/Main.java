@@ -116,7 +116,7 @@ public class Main extends JavaPlugin implements Listener {
 					displayHelp(sender);
 					return true;
 				}
-				if (args.length == 2 && args[0].equalsIgnoreCase("create")) { // This /ffa create <arena>
+				if (args.length == 2 && args[0].equalsIgnoreCase("create") && sender.isOp()) { // This /ffa create <arena>
 					for (Arena a : arenas) {
 						if (a.name.equalsIgnoreCase(args[1])) {
 							sender.sendMessage(ChatColor.RED
@@ -130,7 +130,7 @@ public class Main extends JavaPlugin implements Listener {
 							+ args[1] + " was created!");
 					return true;
 				}
-				if (args.length == 2 && args[0].equalsIgnoreCase("remove")) { // This /ffa remove <arena>
+				if (args.length == 2 && args[0].equalsIgnoreCase("remove") && sender.isOp()) { // This /ffa remove <arena>
 					for (Arena a : arenas) {
 						if (a.name.equalsIgnoreCase(args[1])) {
 							arenas.remove(a);
@@ -144,7 +144,7 @@ public class Main extends JavaPlugin implements Listener {
 							+ args[1] + " was found!");
 					return true;
 				}
-				if (args.length == 2 && args[0].equalsIgnoreCase("reset")) { // This /ffa reset <arena>
+				if (args.length == 2 && args[0].equalsIgnoreCase("reset") && sender.isOp()) { // This /ffa reset <arena>
 					for (Arena a : arenas) {
 						if (a.name.equalsIgnoreCase(args[1])) {
 							a.spawns.clear();
@@ -160,7 +160,7 @@ public class Main extends JavaPlugin implements Listener {
 					return true;
 				}
 				if (args.length == 2 && args[0].equalsIgnoreCase("set")
-						&& args[1].equalsIgnoreCase("lobby")) { // This is /ffa set lobby
+						&& args[1].equalsIgnoreCase("lobby") && sender.isOp()) { // This is /ffa set lobby
 					Player p = (Player) sender;
 					lobby = p.getLocation();
 					p.sendMessage(ChatColor.GREEN + "Lobby set!");
@@ -173,7 +173,7 @@ public class Main extends JavaPlugin implements Listener {
 					}
 					return true;
 				}
-				if (args.length == 3 && args[0].equalsIgnoreCase("add")) { // This is /ffa add <spawn|mine> <arena>
+				if (args.length == 3 && args[0].equalsIgnoreCase("add") && sender.isOp()) { // This is /ffa add <spawn|mine> <arena>
 					Player p = (Player) sender;
 					for (Arena a : arenas) {
 						if (a.name.equalsIgnoreCase(args[2])) {
@@ -204,6 +204,8 @@ public class Main extends JavaPlugin implements Listener {
 					return true;
 				}
 				return false;
+			} else {
+				sender.sendMessage(ChatColor.RED + "You must be an Operator to use that command!");
 			}
 		}
 		sender.sendMessage("You must be a player to use FFA commands.");
