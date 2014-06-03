@@ -1,8 +1,10 @@
 package net.piedmontmc.ffagame;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -40,7 +42,7 @@ import org.bukkit.util.Vector;
 
 public class Main extends JavaPlugin implements Listener {
 	private static Main main;
-	public ArrayList<Arena> arenas = new ArrayList<Arena>();
+	public List<Arena> arenas = new ArrayList<Arena>();
 	public Random gen = new Random();
 	public Location lobby;
 	public boolean inGame = false;
@@ -58,14 +60,20 @@ public class Main extends JavaPlugin implements Listener {
 		Bukkit.getPluginManager().registerEvents(this, this);
 		//load arena
 		this.reloadConfig();
-		curArena = Arena.load("default");
+		arenas = Arena.load();
 	}
 
 	@Override
 	public void onDisable() {
 		//save arena
-		curArena.write();
-		this.saveConfig();
+		for (Arena arena : arenas)
+			arena.write();
+		//this.saveConfig();
+		try {
+			this.getConfig().save(this.getDataFolder() + "/config.yml");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void displayHelp(CommandSender sender) {

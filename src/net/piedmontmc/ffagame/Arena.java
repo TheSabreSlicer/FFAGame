@@ -2,7 +2,9 @@ package net.piedmontmc.ffagame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -26,10 +28,6 @@ public class Arena {
 		FileConfiguration cfg = Main.getInstance().getConfig();
 		cfg.set(name + ".spawns",    spawns);
 		cfg.set(name + ".mines",     mines);
-		cfg.set(name + ".plys",      plys);
-		cfg.set(name + ".specs",     specs);
-		cfg.set(name + ".plspawn",   plspawn);
-		cfg.set(name + ".tempmines", tempmines);
 	}
 
 	/**
@@ -37,47 +35,27 @@ public class Arena {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static Arena load(String name) {
-		Arena arena = new Arena(name);
-		FileConfiguration cfg = Main.getInstance().getConfig();
-		if (cfg.contains(name)) {
-			if (cfg.contains(name + ".spawns")) {
+	public static List<Arena> load() {
+		
+		List<Arena> arenas = new ArrayList<Arena>();
+		
+		for (String key : Main.getInstance().getConfig().getKeys(false)) {
+			Arena arena = new Arena(key);
+			FileConfiguration cfg = Main.getInstance().getConfig();
+			if (cfg.contains(key + ".spawns")) {
 				try {
-					arena.spawns = (ArrayList<Location>) cfg.get(name + ".spawns");
+					arena.spawns = (ArrayList<Location>) cfg.get(key + ".spawns");
 				}
 				catch (Exception e) { e.printStackTrace(); }
 			}
-			if (cfg.contains(name + ".mines")) {
+			if (cfg.contains(key + ".mines")) {
 				try {
-					arena.mines = (ArrayList<Location>) cfg.get(name + ".mines");
+					arena.mines = (ArrayList<Location>) cfg.get(key + ".mines");
 				}
 				catch (Exception e) { e.printStackTrace(); }
 			}
-			if (cfg.contains(name + ".plys")) {
-				try {
-					arena.plys = (ArrayList<String>) cfg.get(name + ".plys");
-				}
-				catch (Exception e) { e.printStackTrace(); }
-			}
-			if (cfg.contains(name + ".specs")) {
-				try {
-					arena.specs = (ArrayList<String>) cfg.get(name + ".specs");
-				}
-				catch (Exception e) { e.printStackTrace(); }
-			}
-			if (cfg.contains(name + ".plspawn")) {
-				try {
-					arena.plspawn = (Map<String, Location>) cfg.get(name + ".plspawn");
-				}
-				catch (Exception e) { e.printStackTrace(); }
-			}
-			if (cfg.contains(name + ".tempmines")) {
-				try {
-					arena.tempmines = (ArrayList<Location>) cfg.get(name + ".tempmines");
-				}
-				catch (Exception e) { e.printStackTrace(); }
-			}
+			arenas.add(arena);
 		}
-		return arena;
+		return arenas;
 	}
 }
