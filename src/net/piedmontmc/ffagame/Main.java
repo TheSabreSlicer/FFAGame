@@ -3,7 +3,6 @@ package net.piedmontmc.ffagame;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -24,8 +23,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -46,7 +45,7 @@ public class Main extends JavaPlugin implements Listener {
 	public Location lobby;
 	public boolean inGame = false;
 	public boolean noMove = false;
-	public Arena curArena = new Arena("default");
+	public Arena curArena = null;
 	private Countdown cd;
 
 	public Main() {
@@ -57,10 +56,16 @@ public class Main extends JavaPlugin implements Listener {
 	public void onEnable() {
 		this.cd = new Countdown();
 		Bukkit.getPluginManager().registerEvents(this, this);
+		//load arena
+		this.reloadConfig();
+		curArena = Arena.load("default");
 	}
 
 	@Override
 	public void onDisable() {
+		//save arena
+		curArena.write();
+		this.saveConfig();
 	}
 
 	public void displayHelp(CommandSender sender) {
