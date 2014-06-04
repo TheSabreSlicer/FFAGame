@@ -59,21 +59,21 @@ public class Main extends JavaPlugin implements Listener {
 		this.cd = new Countdown();
 		Bukkit.getPluginManager().registerEvents(this, this);
 		//load arena
-		this.reloadConfig();
-		arenas = Arena.load();
+		//this.reloadConfig();
+		//arenas = Arena.load();
 	}
 
 	@Override
 	public void onDisable() {
 		//save arena
-		for (Arena arena : arenas)
-			arena.write();
+		//for (Arena arena : arenas)
+		//	arena.write();
 		//this.saveConfig();
-		try {
-			this.getConfig().save(this.getDataFolder() + "/config.yml");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		//try {
+		//	this.getConfig().save(this.getDataFolder() + "/config.yml");
+		//} catch (IOException e) {
+		//	e.printStackTrace();
+		//}
 	}
 
 	public void displayHelp(CommandSender sender) {
