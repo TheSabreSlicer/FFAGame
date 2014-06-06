@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -26,8 +25,8 @@ public class Arena {
 	 */
 	public void write() {
 		FileConfiguration cfg = Main.getInstance().getConfig();
-		cfg.set(name + ".spawns",    spawns);
-		cfg.set(name + ".mines",     mines);
+		cfg.set(name + ".spawns", spawns);
+		cfg.set(name + ".mines", mines);
 	}
 
 	/**
@@ -44,13 +43,13 @@ public class Arena {
 			FileConfiguration cfg = Main.getInstance().getConfig();
 			if (cfg.contains(key + ".spawns")) {
 				try {
-					arena.spawns = (ArrayList<Location>) cfg.get(key + ".spawns");
+					arena.spawns = (ArrayList<Location>) cfg.getList(key + ".spawns");
 				}
 				catch (Exception e) { e.printStackTrace(); }
 			}
 			if (cfg.contains(key + ".mines")) {
 				try {
-					arena.mines = (ArrayList<Location>) cfg.get(key + ".mines");
+					arena.mines = (ArrayList<Location>) cfg.getList(key + ".mines");
 				}
 				catch (Exception e) { e.printStackTrace(); }
 			}
