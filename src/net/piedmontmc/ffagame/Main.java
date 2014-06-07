@@ -383,96 +383,12 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		if (inGame && !noMove) {
 			mineCheck(p);
-			jumpCheck(p);
+			FFAPhysics.jumpCheck(p);
 			// wallCheck(p);
 		}
 		if (needEnd()==true && inGame && !noMove) {
 			endGame();
 		}
-	}
-
-	public void wallCheck(Player p) {
-		double x = p.getVelocity().getX();
-		double y = p.getVelocity().getY();
-		double z = p.getVelocity().getZ();
-
-		Vector vector = p.getVelocity();
-		// The following vector calculator is from:
-		// https://forums.bukkit.org/threads/ricochet-player-help-detecting-if-player-hits-a-wall.224498/s
-		if (p.getEyeLocation().add(p.getVelocity().normalize()).getBlock()
-				.getType() != Material.AIR
-				|| p.getLocation().add(p.getVelocity().normalize()).getBlock()
-						.getType() != Material.AIR) {
-			if (p.getEyeLocation()
-					.getBlock()
-					.getFace(
-							p.getEyeLocation().add(p.getVelocity().normalize())
-									.getBlock()) == BlockFace.UP
-					|| p.getLocation()
-							.getBlock()
-							.getFace(
-									p.getLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.DOWN) {
-				y = y * (-1);
-				p.setMetadata("yVector", new FixedMetadataValue(this, y));
-			}
-			if (p.getEyeLocation()
-					.getBlock()
-					.getFace(
-							p.getEyeLocation().add(p.getVelocity().normalize())
-									.getBlock()) == BlockFace.EAST
-					|| p.getLocation()
-							.getBlock()
-							.getFace(
-									p.getLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.EAST
-					|| p.getEyeLocation()
-							.getBlock()
-							.getFace(
-									p.getEyeLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.WEST
-					|| p.getLocation()
-							.getBlock()
-							.getFace(
-									p.getLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.WEST) {
-				x = x * (-1);
-				p.setMetadata("xVector", new FixedMetadataValue(this, x));
-			}
-			if (p.getEyeLocation()
-					.getBlock()
-					.getFace(
-							p.getEyeLocation().add(p.getVelocity().normalize())
-									.getBlock()) == BlockFace.NORTH
-					|| p.getLocation()
-							.getBlock()
-							.getFace(
-									p.getLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.NORTH
-					|| p.getEyeLocation()
-							.getBlock()
-							.getFace(
-									p.getEyeLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.SOUTH
-					|| p.getLocation()
-							.getBlock()
-							.getFace(
-									p.getLocation()
-											.add(p.getVelocity().normalize())
-											.getBlock()) == BlockFace.SOUTH) {
-				z = z * (-1);
-				p.setMetadata("zVector", new FixedMetadataValue(this, z));
-			}
-		}
-
-		vector = new Vector(x, y, z);
-		p.setVelocity(vector);
 	}
 
 	public void mineCheck(Player p) {
@@ -490,15 +406,6 @@ public class Main extends JavaPlugin implements Listener {
 		}
 	}
 
-	public void jumpCheck(Player p) {
-		if (p.getWorld()
-				.getBlockAt(p.getLocation().getBlockX(),
-						(p.getLocation().getBlockY() - 1),
-						p.getLocation().getBlockZ()).getType().equals(Material.WOOL)) {
-			p.getLocation().setY(p.getLocation().getY() + 1);
-			p.setVelocity(new Vector(p.getVelocity().getX()*2.0, 0.8, p.getVelocity().getZ()*2.0));
-		}
-	}
 	public void clearArrows(Player player) {
 		((CraftPlayer) player).getHandle().getDataWatcher().watch(9, (byte)0);
 	}
